@@ -1,12 +1,25 @@
 ﻿using HilosParaTodos;
 
-MyEvents.finalizar = () => { Console.WriteLine("Suscriptor A"); };
-MyEvents.finalizar += () => { Console.WriteLine("Suscriptor B"); };
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Crear una instancia de EventManager
+        var eventManager = new EventManager<string>();
 
-MiHilo t1 = new MiHilo("x");
-MiHilo t2 = new MiHilo("y");
+        // Suscripciones globales
+        eventManager.Subscribe(arg => Console.WriteLine($"Suscriptor A para: {arg}"));
+        eventManager.Subscribe(arg => Console.WriteLine($"Suscriptor B para: {arg}"));
 
-MyEvents.finalizar += () => { Console.WriteLine("Suscriptor C"); };
+        // Crear los hilos
+        MiHilo t1 = new MiHilo("x", eventManager);
+        MiHilo t2 = new MiHilo("y", eventManager);
 
-t1.Start();
-t2.Start();
+        // Nueva suscripción después de crear los hilos
+        eventManager.Subscribe(arg => Console.WriteLine($"Suscriptor C para: {arg}"));
+
+        // Iniciar los hilos
+        t1.Start();
+        t2.Start();
+    }
+}

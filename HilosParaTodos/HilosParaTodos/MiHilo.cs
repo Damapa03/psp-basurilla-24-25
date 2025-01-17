@@ -2,13 +2,22 @@ namespace HilosParaTodos;
 
 public class MiHilo
 {
-    Thread hilo;
+    private Thread hilo;
     private string text;
-    
-    public MiHilo(string text)
+    private EventManager<string> eventManager;
+
+    public MiHilo(string text, EventManager<string> eventManager)
     {
         this.text = text;
-        MyEvents.finalizar += () => { Console.WriteLine($"Hilo {text}"); };
+        this.eventManager = eventManager;
+
+        // Suscribirse a los eventos del gestor
+        this.eventManager.Subscribe(arg =>
+        {
+            if (arg == text)
+                Console.WriteLine($"Hilo {text}");
+        });
+
         hilo = new Thread(_process);
     }
 
@@ -17,10 +26,12 @@ public class MiHilo
         hilo.Start();
     }
 
-    void _process()
+    private void _process()
     {
-        for (int i = 0; i < 1000; i++) Console.Write (text);
-        MyEvents.finalizar?.Invoke();
+        for (int i = 0; i < 1000; i++) Console.Write(text);
+
+        // Disparar el evento al finalizar
+        eventManager.Trigger(text);
         Console.WriteLine($"Ha terminado: {text}");
     }
 }
